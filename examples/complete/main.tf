@@ -7,22 +7,22 @@ module "wrapper_peering" {
 
   vpc_peering_parameters = {
     "sameAccount" = {
-      create_peer  = true
-      
-      auto_accept  = true
-      vpc          = "requester"
+      create_peer = true
+
+      auto_accept = true
+      vpc         = "requester"
       #vpc_id       = "vpc-01xxxxxxxxxxxxx"
       vpc_accepter = "accepter"
       # vpc_accepter_id = "vpc-02xxxxxxxxxxxxx"
       #peer_region  = "us-east-2"
-    
+
       requester = {
         allow_remote_vpc_dns_resolution = true
       }
       accepter = {
         allow_remote_vpc_dns_resolution = true
       }
-    
+
       vpc_routes = {
         requester = {
           private = {
@@ -32,21 +32,21 @@ module "wrapper_peering" {
       }
     }
     "crossAccount-local" = {
-      create_peer  = true
-      
-      vpc          = "requester"
-      
+      create_peer = true
+
+      vpc = "requester"
+
       vpc_accepter_id = "vpc-02xxxxxxxxxxxxx"
-      peer_owner_id = "123456789012" # Account ID of remote
+      peer_owner_id   = "123456789012" # Account ID of remote
       # peer_region  = null
-    
+
       requester = {
         allow_remote_vpc_dns_resolution = true
       }
       accepter = {
         allow_remote_vpc_dns_resolution = true
       }
-    
+
       vpc_routes = {
         requester = {
           private = {
@@ -68,10 +68,10 @@ module "wrapper_peering" {
 
   vpc_peering_parameters = {
     "crossAccount-remote" = {
-      create_peer  = false
-      
+      create_peer = false
+
       vpc_peering_connection_id = "pcx-01xxxxxxxxxxxxx"
-    
+
       vpc_routes = {
         requester = {
           private = {

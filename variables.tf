@@ -21,14 +21,14 @@ variable "vpc_parameter" {
 /* VPC peering                                                          */
 /*----------------------------------------------------------------------*/
 
-variable "vpc_peering_parameters" {
+variable "peering_parameters" {
   type        = any
   description = "Map of peering connections keyed by logical name."
   default     = {}
 }
 
-variable "vpc_peering_defaults" {
+variable "peering_defaults" {
   type        = any
-  description = "Default values merged into each entry of `vpc_peering_parameters`."
+  description = "Default values merged into each entry of `peering_parameters`."
   default     = {}
 }

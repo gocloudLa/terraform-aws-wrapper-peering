@@ -1,7 +1,7 @@
 locals {
   peerings = {
-    for peering_key, peering_cfg in var.vpc_peering_parameters :
-    peering_key => merge(var.vpc_peering_defaults, peering_cfg)
+    for peering_key, peering_cfg in var.peering_parameters :
+    peering_key => merge(var.peering_defaults, peering_cfg)
   }
 
   requester_vpc_id = {

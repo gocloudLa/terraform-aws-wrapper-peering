@@ -1,25 +1,19 @@
 locals {
   metadata = var.metadata
 
-  common_name_prefix = try(local.metadata.common_name_prefix, local.default_common_name_prefix)
+  common_name_prefix = try(local.metadata.common_name, local.default_common_name)
   common_name        = try(local.metadata.common_name, local.default_common_name)
   common_tags        = try(local.metadata.common_tags, local.default_common_tags)
 
-  default_common_name_prefix = join("-", [
+  default_common_name = join("-", [
     local.metadata.key.company,
     local.metadata.key.env
-  ])
-
-  default_common_name = join("-", [
-    local.common_name_prefix,
-    local.metadata.key.project
   ])
 
   default_common_tags = {
     "company"     = local.metadata.key.company
     "provisioner" = "terraform"
     "environment" = local.metadata.environment
-    "project"     = local.metadata.project
     "created-by"  = "GoCloud.la"
   }
 
