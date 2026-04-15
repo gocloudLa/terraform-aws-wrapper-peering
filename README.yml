@@ -1,0 +1,46 @@
+module_name: Terraform VPC Peering Module
+module_description: Wrapper for AWS VPC peering connections, optional accepter workflow, and route propagation using the same metadata and VPC parameter patterns as other Standard Platform modules.
+disclaimer: In cross-account peering, removing `aws_vpc_peering_connection_accepter` only detaches it from Terraform state, while deletion of the peering connection must come from the requester-side `aws_vpc_peering_connection`.
+module_badges:
+  - url: "https://github.com/gocloudLa/terraform-aws-wrapper-peering/releases/latest"
+    image: "https://img.shields.io/github/v/release/gocloudLa/terraform-aws-wrapper-peering.svg?style=for-the-badge"
+    alt: "Latest Release"
+  - url: ""
+    image: "https://img.shields.io/github/last-commit/gocloudLa/terraform-aws-wrapper-peering.svg?style=for-the-badge"
+    alt: "Last Commit"
+  - url: "https://registry.terraform.io/modules/gocloudLa/wrapper-peering/aws"
+    image: "https://img.shields.io/badge/Terraform-Registry-7B42BC?style=for-the-badge&logo=terraform&logoColor=white"
+    alt: "Terraform Registry"
+quick_start: |
+  ```hcl
+  module "wrapper_peering" {
+    source = "gocloudLa/wrapper-peering/aws"
+
+    metadata = local.metadata
+
+    vpc_parameter = {
+      vpcs = {
+        "requester" = { vpc_id = "vpc-..." }
+        "accepter"  = { vpc_id = "vpc-..." }
+      }
+      route_tables = {
+        "requester-private" = { id = "rtb-..." }
+      }
+    }
+
+    vpc_peering_parameters = {
+      "hub-to-spoke" = {
+        vpc          = "requester"
+        vpc_accepter = "accepter"
+        auto_accept  = true
+        vpc_routes = {
+          requester = {
+            private = {
+              destination_cidr_block = ["10.20.0.0/16"]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
