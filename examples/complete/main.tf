@@ -31,21 +31,14 @@ module "wrapper_peering" {
         }
       }
     }
+
     "crossAccount-local" = {
       create_peer = true
 
       vpc = "requester"
 
-      vpc_accepter_id = "vpc-02xxxxxxxxxxxxx"
-      peer_owner_id   = "123456789012" # Account ID of remote
-      # peer_region  = null
-
-      requester = {
-        allow_remote_vpc_dns_resolution = true
-      }
-      accepter = {
-        allow_remote_vpc_dns_resolution = true
-      }
+      vpc_accepter_id = "vpc-02xxxxxxxxxxxxx" # Remote vpc_id
+      peer_owner_id   = "123456789012"        # Remote aws_account_id
 
       vpc_routes = {
         requester = {
