@@ -29,14 +29,14 @@ resource "aws_vpc_peering_connection_options" "accepter" {
   dynamic "requester" {
     for_each = length(keys(try(var.requester, {}))) > 0 ? [var.requester] : []
     content {
-      allow_remote_vpc_dns_resolution = try(requester.value.allow_remote_vpc_dns_resolution, null)
+      allow_remote_vpc_dns_resolution = try(requester.value.allow_remote_vpc_dns_resolution, true)
     }
   }
 
   dynamic "accepter" {
     for_each = length(keys(try(var.accepter, {}))) > 0 ? [var.accepter] : []
     content {
-      allow_remote_vpc_dns_resolution = try(accepter.value.allow_remote_vpc_dns_resolution, null)
+      allow_remote_vpc_dns_resolution = try(accepter.value.allow_remote_vpc_dns_resolution, true)
     }
   }
 }
