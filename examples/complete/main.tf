@@ -70,7 +70,7 @@ module "wrapper_peering" {
     "crossAccount-remote" = {
       create_peer = false
 
-      vpc_peering_connection_id = "pcx-01xxxxxxxxxxxxx"
+      peering_id = "pcx-01xxxxxxxxxxxxx"
 
       vpc_routes = {
         requester = {
