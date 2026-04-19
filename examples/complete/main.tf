@@ -62,6 +62,7 @@ module "wrapper_peering" {
   vpc_peering_parameters = {
     "crossAccount-remote" = {
       create_peer = false
+      auto_accept = true
 
       peering_id = "pcx-01xxxxxxxxxxxxx"
 

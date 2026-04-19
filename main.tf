@@ -10,7 +10,7 @@ module "peering" {
   peer_owner_id = try(each.value.peer_owner_id, null)
   peer_vpc_id   = local.accepter_vpc_id[each.key]
   peer_region   = try(each.value.peer_region, null)
-  auto_accept   = try(each.value.auto_accept, true)
+  auto_accept   = try(each.value.auto_accept, false)
 
   vpc_peering_connection_id = try(each.value.peering_id, null)
 
