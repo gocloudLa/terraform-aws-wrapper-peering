@@ -1,0 +1,165 @@
+module_name: "Terraform Peering Module"
+module_description: |
+  Declarative wrapper for Amazon VPC peering: create or accept connections, configure DNS resolution options on both sides, and wire route table entries—all derived from your VPC context map alongside wrapper VPC outputs.
+module_badges:
+  - url: "https://github.com/gocloudLa/terraform-aws-wrapper-peering/releases/latest"
+    image: "https://img.shields.io/github/v/release/gocloudLa/terraform-aws-wrapper-peering.svg?style=for-the-badge"
+    alt: "Latest GitHub release"
+  - url: ""
+    image: "https://img.shields.io/github/last-commit/gocloudLa/terraform-aws-wrapper-peering.svg?style=for-the-badge"
+    alt: "Last commit"
+  - url: "https://registry.terraform.io/modules/gocloudLa/wrapper-peering/aws/latest"
+    image: "https://img.shields.io/badge/terraform-registry-blueviolet.svg?style=for-the-badge"
+    alt: "Terraform Registry"
+quick_start: |
+  ```hcl
+  peering_parameters = {
+    "sameAccount" = {
+      create_peer = true
+
+      auto_accept = true
+      vpc         = "requester"
+      #vpc_id       = "vpc-01xxxxxxxxxxxxx"
+      vpc_accepter = "accepter"
+      # vpc_accepter_id = "vpc-02xxxxxxxxxxxxx"
+
+      requester = {
+        allow_remote_vpc_dns_resolution = true
+      }
+      accepter = {
+        allow_remote_vpc_dns_resolution = true
+      }
+
+      vpc_routes = {
+        requester = {
+          private = {
+            destination_cidr_block = ["10.20.0.0/16"]
+          }
+        }
+        accepter = {
+          private = {
+            destination_cidr_block = ["10.10.0.0/16"]
+          }
+        }
+      }
+    }
+  }
+  ```
+features:
+  - icon: "🔗"
+    title: "Same-account peering, options, and routes"
+    short_description: "Create the connection, set requester/accepter options, and publish IPv4/IPv6 routes from one map."
+    long_description: |
+      The submodule creates `aws_vpc_peering_connection` when `create_peer` is true, then applies `aws_vpc_peering_connection_options` for requester and accepter DNS resolution flags when you pass non-empty `requester` / `accepter` maps. The wrapper resolves `vpc` and `vpc_accepter` logical names against `vpc_parameter.vpcs`, expands `vpc_routes` into `aws_route` rows using `vpc_parameter.route_tables` keys shaped as `"<vpc>-<route_table>"`, and attaches merged tags including a stable `Name`.
+    examples:
+      - title: "Same-account example (logical VPC names)"
+        code: |
+          ```hcl
+          peering_parameters = {
+            "sameAccount" = {
+              create_peer = true
+
+              auto_accept = true
+              vpc         = "requester"
+              #vpc_id       = "vpc-01xxxxxxxxxxxxx"
+              vpc_accepter = "accepter"
+              # vpc_accepter_id = "vpc-02xxxxxxxxxxxxx"
+
+              requester = {
+                allow_remote_vpc_dns_resolution = true
+              }
+              accepter = {
+                allow_remote_vpc_dns_resolution = true
+              }
+
+              vpc_routes = {
+                requester = {
+                  private = {
+                    destination_cidr_block = ["10.20.0.0/16"]
+                  }
+                }
+                accepter = {
+                  private = {
+                    destination_cidr_block = ["10.10.0.0/16"]
+                  }
+                }
+              }
+            }
+          }
+          ```
+  - icon: "🌐"
+    title: "Cross-account requester and accepter"
+    short_description: "Split stacks: one side creates the peering; the other accepts with `peering_id` and optional routes."
+    long_description: |
+      For another account or a dedicated accepter stack, set `peer_owner_id` and `vpc_accepter_id` on the requester so `aws_vpc_peering_connection` targets the remote VPC. On the peer side, set `create_peer = false`, pass the shared `peering_id`, and use `aws_vpc_peering_connection_accepter` plus `aws_vpc_peering_connection_options` when you supply an `accepter` map. Apply order is inherently multi-step across accounts; DNS options may need the peering to be active before they succeed—plan a follow-up apply if your first run only establishes the connection.
+    examples:
+      - title: "Requester stack (remote VPC id and account)"
+        code: |
+          ```hcl
+          peering_parameters = {
+            "crossAccount-requester" = {
+              create_peer = true
+
+              vpc = "requester"
+
+              vpc_accepter_id = "vpc-02xxxxxxxxxxxxx"
+              peer_owner_id   = "123456789012"
+
+              # # Can be enable after peering is Active
+              # requester = {
+              #   allow_remote_vpc_dns_resolution = true
+              # }
+
+              vpc_routes = {
+                requester = {
+                  private = {
+                    destination_cidr_block = ["10.20.0.0/16"]
+                  }
+                }
+              }
+            }
+          }
+          ```
+      - title: "Accepter stack (existing peering id)"
+        code: |
+          ```hcl
+          peering_parameters = {
+            "crossAccount-accepter" = {
+              create_peer = false
+              auto_accept = true
+
+              peering_id = "pcx-01xxxxxxxxxxxxx"
+
+              # # Can be enable after peering is Active
+              # accepter = {
+              #   allow_remote_vpc_dns_resolution = true
+              # }
+
+              vpc_routes = {
+                accepter = {
+                  private = {
+                    destination_cidr_block = ["10.10.0.0/16"]
+                  }
+                }
+              }
+            }
+          }
+          ```
+important_notes: |
+  - ⚠️ **Cross-account:** Coordinate two applies (or two roots) so the requester creates `pcx-…` before the accepter references `peering_id`; IAM and ownership boundaries are your responsibility outside this module.
+  - ℹ️ **DNS options:** Example comments keep `requester` / `accepter` blocks disabled until the peering is active—expect a second apply when enabling `allow_remote_vpc_dns_resolution` across accounts.
+  - 🔒 **Routes:** `vpc_routes` resolves route tables only via `vpc_parameter.route_tables["<vpc>-<rt>"]`; missing keys fail planning—keep naming aligned with your VPC wrapper outputs.
+input_table: |
+  | vpc | Logical requester VPC name looked up in `vpc_parameter.vpcs` when `vpc_id` is null. | string | null | no |
+  | vpc_id | Explicit requester VPC ID; wins over `vpc` when set. | string | null | no |
+  | vpc_accepter | Logical accepter VPC name in `vpc_parameter.vpcs` when `vpc_accepter_id` is null. | string | null | no |
+  | vpc_accepter_id | Explicit accepter VPC ID; wins over `vpc_accepter` when set. | string | null | no |
+  | peer_owner_id | AWS account ID owning the peer VPC; omit for same-account peering. | string | null | no |
+  | peer_region | Peer VPC region for cross-region peering. | string | null | no |
+  | create_peer | When true, create `aws_vpc_peering_connection`; when false, accept with `peering_id`. | bool | true | no |
+  | auto_accept | Auto-accept peering where supported (same account/region). | bool | false | no |
+  | peering_id | Existing `pcx-…` ID used when `create_peer` is false. | string | null | no |
+  | requester | Map forwarded to request-side `aws_vpc_peering_connection_options` (e.g. DNS resolution). | map(any) | {} | no |
+  | accepter | Map forwarded to accepter-side options resources. | map(any) | {} | no |
+  | tags | Extra tags merged with common metadata tags. | map(string) | {} | no |
+  | vpc_routes | Nested map: VPC name → route table name → `destination_cidr_block` / `destination_ipv6_cidr_block` lists, expanded to `aws_route`. | map(any) | {} | no |

@@ -1,0 +1,17 @@
+example_name: Complete Example
+description: >
+  This example shows how to wire the VPC peering wrapper with platform metadata,
+  optional `vpc_parameter` maps (aligned with the VPC wrapper), and
+  `vpc_peering_parameters`.
+notes: >
+  By default all maps are empty so you can run `terraform init` and
+  `terraform validate` without creating peering connections. Uncomment and fill
+  in VPC IDs, route table IDs, and peering entries to deploy.
+quick_start: |
+  terraform init
+  terraform plan
+  terraform apply
+security_notes: >
+  Review CIDRs for routes, DNS resolution flags, and cross-account
+  `peer_owner_id` / `peer_region` before using this in production.
+documentation: ../../README.md
